@@ -1,28 +1,48 @@
-const Tournament = require('../models/tournamentModel');
+const Tournament = require('../../models/admin/tournamentModel');
 
 const createTournament = (req, res) => {
-    if (!req.body.tournamentId || !req.body.entryFee || !req.body.joiningStartTime || !req.body.joiningEndTime || !req.body.gameplayStartTime || !req.body.gameplayEndTime || !req.body.numberOfRounds) {
-        res.status(400).send({ message: "Content can not be empty!" });
-        return;
+    console.log(req.body);
+    const {
+        tournamentId,
+        entryFee,
+        joiningStartTime,
+        joiningEndTime,
+        gameplayStartTime,
+        gameplayEndTime,
+        numberOfRounds,
+        prizes
+    } = req.body;
+
+    // Check for missing required fields
+    if (!tournamentId || !entryFee || !joiningStartTime || !joiningEndTime || !gameplayStartTime || !gameplayEndTime || !numberOfRounds) {
+        return res.status(400).send({ message: "Required fields are missing!" });
     }
 
     const tournament = new Tournament({
-        tournamentId: req.body.tournamentId,
-        entryFee: req.body.entryFee,
-        joiningStartTime: req.body.joiningStartTime,
-        joiningEndTime: req.body.joiningEndTime,
-        gameplayStartTime: req.body.gameplayStartTime,
-        gameplayEndTime: req.body.gameplayEndTime,
-        numberOfRounds: req.body.numberOfRounds,
-        prizes: req.body.prizes,
-        playerCount: 0,
+        tournamentId,
+        entryFee,
+        joiningStartTime,
+        joiningEndTime,
+        gameplayStartTime,
+        gameplayEndTime,
+        numberOfRounds,
+        prizes,
+        playerCount: 0
     });
 
     tournament.save()
         .then(data => res.send(data))
-        .catch(err => res.status(500).send({
-            message: err.message || "Some error occurred while creating the Tournament."
-        }));
+        .catch(err => {
+            // Handle duplicate key error
+            if (err.code === 11000) {
+                return res.status(400).send({ message: "Duplicate tournament ID. Please provide a unique ID." });
+            }
+            // Log detailed error information
+            console.error("Error saving tournament:", err);
+            res.status(500).send({
+                message: err.message || "Some error occurred while creating the Tournament."
+            });
+        });
 };
 
 const getAllTournaments = (req, res) => {

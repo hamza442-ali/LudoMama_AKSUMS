@@ -1,4 +1,4 @@
-const Score = require('../models/scoreModel');
+const Score = require('../../models/admin/scoreModel');
 
 const recordScore = (req, res) => {
     if (!req.body.userId || !req.body.tournamentId || !req.body.round || !req.body.score) {

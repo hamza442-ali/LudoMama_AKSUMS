@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const scoreController = require('../controllers/scoreController');
+const scoreController = require('../../controllers/admin/scoreController');
 
 // Record a score
 router.post('/recordScore', scoreController.recordScore);

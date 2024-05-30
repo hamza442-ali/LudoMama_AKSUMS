@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const participationController = require('../controllers/participationController');
+const participationController = require('../../controllers/admin/participationController');
 
 // Join a tournament
 router.post('/joinTournament', participationController.joinTournament);

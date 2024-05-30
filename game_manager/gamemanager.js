@@ -72,6 +72,96 @@ exports.getroom = function (r_roomID) {
   return roominfo;
 }
 
+
+
+
+
+// game play scoring   - Aksums 
+
+
+exports.RecordScore = function(socket, userInfo, tournamentID, score) {
+  let participationCollection = database.collection('participations');
+  let tournamentCollection = database.collection('tournaments');
+
+  participationCollection.findOne({ userID: userInfo.userid, tournamentID: tournamentID }, function(err, participation) {
+      if (err || !participation) {
+          socket.emit('REQ_RECORD_SCORE_RESULT', { result: 'failed', reason: 'Participation not found' });
+          return;
+      }
+
+      tournamentCollection.findOne({ tournamentID: tournamentID }, function(err, tournament) {
+          if (err || !tournament) {
+              socket.emit('REQ_RECORD_SCORE_RESULT', { result: 'failed', reason: 'Tournament not found' });
+              return;
+          }
+
+          let currentTime = new Date();
+          if (currentTime < tournament.gameplayStart || currentTime > tournament.gameplayEnd) {
+              socket.emit('REQ_RECORD_SCORE_RESULT', { result: 'failed', reason: 'Gameplay period closed' });
+              return;
+          }
+
+          if (participation.roundsPlayed >= tournament.rounds) {
+              socket.emit('REQ_RECORD_SCORE_RESULT', { result: 'failed', reason: 'Maximum rounds played' });
+              return;
+          }
+
+          // Record the score
+          participationCollection.updateOne({ userID: userInfo.userid, tournamentID: tournamentID }, {
+              $push: { scores: score },
+              $inc: { roundsPlayed: 1 }
+          });
+
+          socket.emit('REQ_RECORD_SCORE_RESULT', { result: 'success', tournamentID: tournamentID });
+      });
+  });
+};
+
+
+
+// particupation  - AKSUMS 
+
+
+exports.JoinTournament = function(socket, userInfo, tournamentID) {
+  let userCollection = database.collection('userdatas');
+  let tournamentCollection = database.collection('tournaments');
+
+  tournamentCollection.findOne({ tournamentID: tournamentID }, function(err, tournament) {
+      if (err || !tournament) {
+          socket.emit('REQ_JOIN_TOURNAMENT_RESULT', { result: 'failed', reason: 'Tournament not found' });
+          return;
+      }
+
+      let currentTime = new Date();
+      if (currentTime < tournament.joiningStart || currentTime > tournament.joiningEnd) {
+          socket.emit('REQ_JOIN_TOURNAMENT_RESULT', { result: 'failed', reason: 'Joining period closed' });
+          return;
+      }
+
+      userCollection.findOne({ userid: userInfo.userid }, function(err, user) {
+          if (err || !user || (user.points + user.winning_amount) < tournament.entryFee) {
+              socket.emit('REQ_JOIN_TOURNAMENT_RESULT', { result: 'failed', reason: 'Insufficient funds' });
+              return;
+          }
+
+          // Deduct entry fee from user's account
+          userCollection.updateOne({ userid: userInfo.userid }, {
+              $inc: { points: -tournament.entryFee }
+          });
+
+          // Add user to tournament
+          tournamentCollection.updateOne({ tournamentID: tournamentID }, {
+              $push: { players: userInfo.userid },
+              $inc: { playerCount: 1 }
+          });
+
+          socket.emit('REQ_JOIN_TOURNAMENT_RESULT', { result: 'success', tournamentID: tournamentID });
+      });
+  });
+};
+
+
+
 exports.ReduceEmojiPrice = function (socket, data) {
   let currentDate = new Date().toLocaleString("en-US", {
     timeZone: "Asia/Calcutta",

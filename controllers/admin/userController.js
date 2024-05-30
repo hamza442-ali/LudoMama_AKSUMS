@@ -1,4 +1,4 @@
-const User = require('../models/userModel');
+const User = require('../../models/admin/userModel');
 
 const createUser = (req, res) => {
     if (!req.body.username || !req.body.email || !req.body.password) {

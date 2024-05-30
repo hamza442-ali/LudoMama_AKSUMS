@@ -1,6 +1,6 @@
-const Participation = require('../models/participationModel');
-const Tournament = require('../models/tournamentModel');
-const User = require('../models/userModel');
+const Participation = require('../../models/admin/participationModel');
+const Tournament = require('../../models/admin/tournamentModel');
+const User = require('../../models/admin/userModel');
 
 const joinTournament = (req, res) => {
     if (!req.body.userId || !req.body.tournamentId) {

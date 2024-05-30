@@ -7,11 +7,15 @@ var state = {
 };
 
 exports.connect = function(done) {
-    
     if (state.db)
         return done();
 
-    MongoClient.connect(process.env.URL,{ useNewUrlParser: true, useUnifiedTopology: true }, function(err, client) {
+    MongoClient.connect(process.env.URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 30000, // Timeout for server selection when initial connection
+        socketTimeoutMS: 45000 // Timeout for all socket operations in milliseconds
+    }, function(err, client) {
         if (err)
             return done(err);
         var db = client.db('LudoMama');
@@ -19,6 +23,7 @@ exports.connect = function(done) {
         done();
     });
 };
+
 
 exports.get = function() {
     return state.db;

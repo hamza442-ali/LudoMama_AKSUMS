@@ -12,9 +12,9 @@ var loginmanager = require('./room_manager/loginmanager');
 
 // Aksums 
 const userRoutes = require('./routes/admin/userRoute');
-const tournamentRoutes = require('./routes/tournamentRoutes');
-const participationRoutes = require('./routes/participationRoutes');
-const scoreRoutes = require('./routes/scoreRoutes');
+const tournamentRoutes = require('./routes/admin/tournamentRoute');
+const participationRoutes = require('./routes/admin/participationRoute');
+const scoreRoutes = require('./routes/admin/scoreRoute');
 
 
 

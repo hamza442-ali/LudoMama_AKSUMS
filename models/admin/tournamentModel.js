@@ -1,7 +1,20 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const tournamentSchema = new Schema({   // Aksums Tec (Development)
+// Define the prize schema to ensure proper structure
+const prizeSchema = new Schema({
+    position: {
+        type: Number,
+        required: true
+    },
+    amount: {
+        type: Number,
+        required: true
+    }
+}, { _id: false }); // _id: false ensures that prizes do not have their own unique IDs
+
+// Define the tournament schema
+const tournamentSchema = new Schema({ // Aksums Tec (Development)
     tournamentId: {
         type: String,
         required: true,
@@ -31,16 +44,7 @@ const tournamentSchema = new Schema({   // Aksums Tec (Development)
         type: Number,
         required: true
     },
-    prizes: [{
-        position: {
-            type: Number,
-            required: true
-        },
-        amount: {
-            type: Number,
-            required: true
-        }
-    }],
+    prizes: [prizeSchema], // Use the prize schema to define the structure of each prize
     playerCount: {
         type: Number,
         default: 0
@@ -51,11 +55,7 @@ const tournamentSchema = new Schema({   // Aksums Tec (Development)
     }
 });
 
-module.exports = mongoose.model('Tournament', tournamentSchema);
-
-
-
-
+// Method to calculate prizes based on the number of players
 tournamentSchema.methods.calculatePrizes = function() {
     const totalPlayers = this.playerCount;
     let prizes = [];
